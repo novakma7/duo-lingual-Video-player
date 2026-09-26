@@ -1,0 +1,2 @@
+"""Qt uživatelské rozhraní."""
+
