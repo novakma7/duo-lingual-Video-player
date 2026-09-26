@@ -40,7 +40,7 @@ class PlaybackController(QObject):
         self.device_a: Optional[int] = None
         self.device_b: Optional[int] = None
         self.subtitle_cues: list[SubtitleCue] = []
-        self.subtitle_source = "vypnuto"
+        self.subtitle_source = "off"
         self.worker: DecodeWorker | None = None
         self.state = PlaybackState.STOPPED
         self._eof = False
@@ -73,16 +73,16 @@ class PlaybackController(QObject):
         try:
             self.info = probe_media(path)
             if not self.info.video_tracks:
-                raise ValueError("Soubor neobsahuje video stopu.")
+                raise ValueError("The file does not contain a video track.")
             self.track_a, self.track_b = choose_default_tracks(self.info.audio_tracks)
             self.subtitle_cues = []
-            self.subtitle_source = "vypnuto"
+            self.subtitle_source = "off"
             self.media_loaded.emit(self.info)
             self._emit_routes()
             self.position_changed.emit(0.0, self.info.duration)
         except Exception as exc:
             self.info = None
-            self.error_occurred.emit(f"Soubor nelze otevřít: {exc}")
+            self.error_occurred.emit(f"The file could not be opened: {exc}")
 
     def set_tracks(self, track_a: Optional[int], track_b: Optional[int]) -> None:
         changed = (track_a, track_b) != (self.track_a, self.track_b)
@@ -120,7 +120,7 @@ class PlaybackController(QObject):
 
     def play(self) -> None:
         if self.info is None:
-            self.error_occurred.emit("Nejprve otevřete soubor MKV.")
+            self.error_occurred.emit("Open an MKV file first.")
             return
         errors = validate_routes(self.track_a, self.track_b, self.device_a, self.device_b)
         if errors:
@@ -165,7 +165,7 @@ class PlaybackController(QObject):
 
     def set_subtitle_off(self) -> None:
         self.subtitle_cues = []
-        self.subtitle_source = "vypnuto"
+        self.subtitle_source = "off"
         self.subtitle_changed.emit("")
 
     def load_external_subtitle(self, path: str) -> None:
@@ -174,17 +174,17 @@ class PlaybackController(QObject):
             self.subtitle_source = Path(path).name
             self._last_subtitle = ""
         except Exception as exc:
-            self.error_occurred.emit(f"Externí titulky nelze načíst: {exc}")
+            self.error_occurred.emit(f"External subtitles could not be loaded: {exc}")
 
     def load_embedded_subtitle(self, stream_index: int) -> None:
         if self.info is None:
             return
         try:
             self.subtitle_cues = load_embedded(self.info.path, stream_index)
-            self.subtitle_source = f"stopa #{stream_index}"
+            self.subtitle_source = f"track #{stream_index}"
             self._last_subtitle = ""
         except Exception as exc:
-            self.error_occurred.emit(f"Vestavěné titulky nelze načíst: {exc}")
+            self.error_occurred.emit(f"Embedded subtitles could not be loaded: {exc}")
 
     def shutdown(self) -> None:
         self._timer.stop()
@@ -195,7 +195,7 @@ class PlaybackController(QObject):
         device_b = find_device(self.devices, self.device_b)
         if device_a is None or device_b is None:
             self.error_occurred.emit(
-                "Vybrané zařízení už není dostupné. Obnovte seznam a zvolte výstupy znovu."
+                "The selected device is no longer available. Refresh the list and select the outputs again."
             )
             return False
         try:
@@ -281,15 +281,15 @@ class PlaybackController(QObject):
         video_buffer = self.worker.video_buffered if self.worker else 0
         fmt = lambda value: "—" if value is None else f"{value:.3f} s"
         lines = [
-            f"Stav: {self.state.value}",
-            f"Hlavní čas: {position:.3f} s",
-            f"PTS videa: {fmt(video_pts)}  | fronta: {video_buffer} snímků",
-            f"PTS zvuku A: {fmt(audio_a.pts)}  | buffer: {audio_a.buffered_seconds:.2f} s",
-            f"Zařízení A: {audio_a.device_name}",
-            f"PTS zvuku B: {fmt(audio_b.pts)}  | buffer: {audio_b.buffered_seconds:.2f} s",
-            f"Zařízení B: {audio_b.device_name}",
-            f"Chyba A: {audio_a.error or '—'}",
-            f"Chyba B: {audio_b.error or '—'}",
+            f"State: {self.state.value}",
+            f"Master clock: {position:.3f} s",
+            f"Video PTS: {fmt(video_pts)}  | queue: {video_buffer} frames",
+            f"Audio A PTS: {fmt(audio_a.pts)}  | buffer: {audio_a.buffered_seconds:.2f} s",
+            f"Device A: {audio_a.device_name}",
+            f"Audio B PTS: {fmt(audio_b.pts)}  | buffer: {audio_b.buffered_seconds:.2f} s",
+            f"Device B: {audio_b.device_name}",
+            f"Error A: {audio_a.error or '—'}",
+            f"Error B: {audio_b.error or '—'}",
         ]
         self.diagnostics_changed.emit("\n".join(lines))
 

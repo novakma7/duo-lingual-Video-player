@@ -7,10 +7,10 @@ from typing import Optional
 
 
 class PlaybackState(str, Enum):
-    STOPPED = "zastaveno"
-    PLAYING = "přehrávání"
-    PAUSED = "pozastaveno"
-    ERROR = "chyba"
+    STOPPED = "stopped"
+    PLAYING = "playing"
+    PAUSED = "paused"
+    ERROR = "error"
 
 
 @dataclass(frozen=True)
@@ -28,7 +28,7 @@ class TrackInfo:
         name = self.title.strip() or self.language.upper()
         details = [f"#{self.index}", name, self.codec]
         if self.channels:
-            details.append(f"{self.channels} kanálů")
+            details.append(f"{self.channels} channels")
         return " · ".join(details)
 
 

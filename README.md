@@ -1,21 +1,21 @@
 # DuoLingual Player
 
-DuoLingual Player je desktopový přehrávač pro Windows určený k současnému poslechu dvou jazykových stop z jednoho MKV. Video běží v jediném okně, zatímco stopa A a stopa B mají vlastní dekódování, převzorkování, buffer, hlasitost, synchronizační posun a fyzický či virtuální zvukový výstup.
+DuoLingual Player is a Windows desktop media player designed to play two language tracks from a single MKV file at the same time. Video is shown in one window, while output A and output B each have their own decoding, resampling, buffer, volume, sync offset, and physical or virtual audio device.
 
-Backend nepoužívá VLC. Kontejner a kodeky zpracovává PyAV/FFmpeg, obraz vykreslují základní moduly PySide6 a zvuk jde přes PortAudio (`sounddevice`) do zařízení dostupných ve Windows včetně WASAPI a virtuálních vstupů VoiceMeeter.
+The backend does not use VLC. PyAV/FFmpeg handles the container and codecs, PySide6 renders the interface and video, and PortAudio (`sounddevice`) sends audio to Windows devices, including WASAPI and virtual VoiceMeeter inputs.
 
-## Požadavky
+## Requirements
 
-- Windows 10 nebo 11;
-- Python 3.10–3.13 (doporučeno 3.12, 64bit);
-- dvě zvuková výstupní zařízení;
-- MKV se dvěma zvukovými stopami pro plný dvoujazyčný režim.
+- Windows 10 or Windows 11;
+- Python 3.10–3.13 (64-bit Python 3.12 recommended);
+- two audio output devices;
+- an MKV file with two audio tracks for full dual-language playback.
 
-PyAV z PyPI obvykle obsahuje potřebné knihovny FFmpeg. Samostatná instalace VLC není potřeba.
+PyAV wheels from PyPI normally include the required FFmpeg libraries. VLC does not need to be installed.
 
-## Instalace a spuštění
+## Installation and startup
 
-V PowerShellu v adresáři projektu použijte pro virtuální prostředí krátkou cestu mimo Google Drive. PySide6 obsahuje hlubokou adresářovou strukturu a při `.venv` uvnitř tohoto projektu by instalace mohla překročit limit délky cest ve Windows.
+Open PowerShell in the project directory. Use a short path outside Google Drive for the virtual environment. PySide6 contains a deeply nested directory structure, and placing `.venv` inside this project may exceed the Windows path-length limit.
 
 ```powershell
 $venv = "$env:LOCALAPPDATA\DuoLingualPlayer\venv"
@@ -25,86 +25,88 @@ py -3.12 -m venv $venv
 & "$venv\Scripts\python.exe" -m duolingual_player
 ```
 
-Aktivace prostředí není nutná. Při dalších spuštěních stačí v adresáři projektu poslední příkaz. Alternativně lze použít:
+Activating the environment is not required. For subsequent launches, run only the final command from the project directory. Alternatively:
 
 ```powershell
 & "$env:LOCALAPPDATA\DuoLingualPlayer\venv\Scripts\python.exe" run_player.py
 ```
 
-Pokud už vznikla neúplná `.venv` uvnitř projektu, není používána a po zavření terminálů ji lze smazat. Druhou možností je systémově zapnout podporu dlouhých cest ve Windows, ale pro tento projekt to není potřeba.
+After installation, you can also start the application by double-clicking `start_player.bat`. Its console window closes automatically after the GUI starts.
 
-## Použití
+If an incomplete `.venv` was already created inside the project, it is not used and can be removed after all terminals have been closed. Enabling Windows long-path support system-wide is another option, but it is not required for this project.
 
-1. Klikněte na **Otevřít MKV** a vyberte video.
-2. Vpravo nastavte odlišnou **Zvukovou stopu** pro výstup A a B.
-3. Pro A a B nastavte dvě různá zařízení. Výstupy WASAPI jsou ve výběru řazeny jako první.
-4. Spusťte přehrávání mezerníkem nebo tlačítkem přehrát.
-5. Případný rozdíl latence Bluetooth dorovnejte zvlášť pro A a B. Kladná hodnota zvuk zpozdí, záporná jej předsune.
+## Usage
 
-Při odpojení Bluetooth zařízení přehrávač zobrazí chybu. Připojte zařízení, stiskněte **Obnovit zvuková zařízení**, znovu je vyberte a pokračujte. Změna stopy či zařízení během přehrávání znovu sestaví obě audio větve od aktuální pozice.
+1. Click **Open MKV** and select a video.
+2. Select a different **Audio track** for output A and output B in the right-hand panel.
+3. Select two different output devices. WASAPI devices are listed first.
+4. Start playback with Space or the Play button.
+5. Correct any Bluetooth latency difference independently for A and B. A positive offset delays the audio; a negative offset advances it.
 
-### Klávesové zkratky
+If a Bluetooth device disconnects, the player displays an error. Reconnect the device, click **Refresh audio devices**, select the output again, and continue. Changing a track or device during playback rebuilds both audio pipelines from the current position.
 
-| Klávesa | Akce |
+### Keyboard and mouse controls
+
+| Input | Action |
 |---|---|
-| Mezerník | Přehrát / pauza |
-| Šipka vlevo/vpravo | Skok o 5 sekund |
-| Shift + šipka | Skok o 30 sekund |
-| F | Celá obrazovka |
-| Dvojklik na video | Celá obrazovka / návrat do okna |
-| Esc | Opuštění celé obrazovky |
-| M | Ztlumit / obnovit oba výstupy |
-| Ctrl+O | Otevřít soubor |
+| Space | Play / pause |
+| Left/right arrow | Jump 5 seconds |
+| Shift + left/right arrow | Jump 30 seconds |
+| F | Toggle fullscreen |
+| Double-click video | Toggle fullscreen |
+| Esc | Leave fullscreen |
+| M | Mute / restore both outputs |
+| Ctrl+O | Open a file |
 
-V menu **Zobrazení → Vyhlazení obrazu** lze zapnout nebo vypnout jemnější interpolaci při zvětšování videa. Ve výchozím stavu je zapnutá. Pomáhá proti viditelným hranám pixelů vzniklým škálováním, nedokáže však odstranit bloky, které už jsou součástí silně komprimovaného zdrojového videa.
+Use **View → Video smoothing** to enable or disable smoother interpolation when the video is enlarged. It is enabled by default. It reduces hard pixel edges caused by scaling, but it cannot remove compression blocks already present in a heavily compressed source.
 
-## Titulky
+## Subtitles
 
-V panelu **Titulky** lze vybrat podporovanou vestavěnou textovou stopu MKV nebo načíst externí soubor SRT. Bitmapové titulky (například PGS) se momentálně nevykreslují. U rozsáhlé vestavěné titulkové stopy může první načtení chvíli trvat.
+The **Subtitles** panel supports compatible embedded text subtitle tracks and external SRT files. Bitmap subtitles such as PGS are not currently rendered. Loading a very large embedded subtitle track may take a moment.
 
 ## VoiceMeeter Banana
 
-1. Nainstalujte VoiceMeeter Banana a po instalaci restartujte Windows.
-2. Ve VoiceMeeter nastavte vpravo nahoře **A1** a **A2** na dvě fyzická sluchátka. Pro Bluetooth bývá stabilní ovladač `WDM`, případně `MME`, pokud WDM zlobí.
-3. V přehrávači vyberte například:
-   - výstup A: **Voicemeeter Input (VB-Audio Voicemeeter VAIO)**;
-   - výstup B: **Voicemeeter AUX Input (VB-Audio Voicemeeter AUX VAIO)**.
-4. Na proužku VAIO ve VoiceMeeter zapněte pouze sběrnici A1 a na proužku AUX pouze A2. Tím se jazyky fyzicky oddělí.
-5. Pokud se zařízení nezobrazí, ověřte v nastavení zvuku Windows, že není zakázané, a v aplikaci obnovte seznam zařízení.
+1. Install VoiceMeeter Banana and restart Windows.
+2. In the top-right corner of VoiceMeeter, set **A1** and **A2** to the two physical headphones. The `WDM` driver is usually the most stable choice for Bluetooth; try `MME` if WDM causes problems.
+3. In DuoLingual Player, select for example:
+   - output A: **Voicemeeter Input (VB-Audio Voicemeeter VAIO)**;
+   - output B: **Voicemeeter AUX Input (VB-Audio Voicemeeter AUX VAIO)**.
+4. On the VAIO strip, enable only bus A1. On the AUX strip, enable only A2. This keeps the languages physically separate.
+5. If a device is missing, make sure it is enabled in Windows sound settings, then refresh the device list in the player.
 
-VoiceMeeter může přidat jinou latenci než přímý Bluetooth výstup. Použijte posun A/B v milisekundách; obvyklé ladění je po 10–20 ms.
+VoiceMeeter may introduce different latency than a direct Bluetooth output. Use the A/B millisecond offsets to compensate; adjustments of 10–20 ms are a useful starting point.
 
-## Diagnostika
+## Diagnostics
 
-Panel zobrazuje hlavní čas, poslední vykreslené PTS videa, PTS obou zvukových výstupů, velikost front a případnou chybu zařízení. Při řešení problémů sledujte zejména, zda audio buffer neklesá trvale k nule a zda vybrané zařízení po odpojení nezmizelo.
+The Diagnostics panel displays the master clock, last rendered video PTS, both audio PTS values, queue sizes, selected devices, and device errors. When troubleshooting, check whether an audio buffer continuously drops to zero or a selected device disappears after being disconnected.
 
-## Testy
+## Tests
 
 ```powershell
 & "$env:LOCALAPPDATA\DuoLingualPlayer\venv\Scripts\python.exe" -m pytest -q
 ```
 
-Testy pokrývají výchozí výběr rozdílných stop a zařízení, validaci tras a převod synchronizačního posunu z milisekund.
+The tests cover default selection of distinct tracks and devices, route validation, and conversion of the sync offset from milliseconds.
 
-## Architektura
+## Architecture
 
-- `core/clock.py` – společný monotónní čas přehrávání;
-- `core/media.py` – PyAV probe, demux a dekódovací vlákno;
-- `core/audio.py` – dvě instance nezávislé audio pipeline a callback výstupu;
-- `core/devices.py` – výčet výstupních zařízení a host API;
-- `core/controller.py` – životní cyklus, seek, synchronizace a diagnostika;
-- `core/subtitles.py` – SRT a vestavěné textové titulky;
-- `ui/` – hlavní okno a vykreslení obrazu/titulků.
+- `core/clock.py` — shared monotonic playback clock;
+- `core/media.py` — PyAV probing, demuxing, and decoding thread;
+- `core/audio.py` — two independent audio pipeline instances and output callbacks;
+- `core/devices.py` — output-device and host-API enumeration;
+- `core/controller.py` — lifecycle, seeking, synchronization, and diagnostics;
+- `core/subtitles.py` — SRT and embedded text subtitles;
+- `ui/` — main window and video/subtitle rendering.
 
-## Známá omezení
+## Known limitations
 
-- Přesná koncová latence závisí na Bluetooth kodeku, ovladači a velikosti hardwarového bufferu. Posun A/B je určen k jejímu ručnímu dorovnání.
-- Windows může stejné fyzické zařízení zveřejnit přes více host API. Pro nízkou a předvídatelnou latenci preferujte položku označenou `Windows WASAPI`.
-- Některá Bluetooth sluchátka přepnou do úzkopásmového hands-free profilu, pokud je současně používá mikrofon. Pro kvalitní stereo mikrofon sluchátek zakažte nebo nepoužívejte.
-- Podporované jsou textové titulky, ne PGS/VobSub bitmapové stopy.
-- DRM média a poškozené kontejnery nejsou podporované.
-- Aplikace volí první video stopu. Přepínání mezi více video stopami není v této verzi v rozhraní.
+- Final latency depends on the Bluetooth codec, driver, and hardware buffer size. The independent A/B offsets are intended for manual correction.
+- Windows may expose one physical device through multiple host APIs. Prefer an entry marked `Windows WASAPI` for lower and more predictable latency.
+- Some Bluetooth headphones switch to a narrow-band hands-free profile when their microphone is used at the same time. Disable or avoid the headset microphone for high-quality stereo playback.
+- Text subtitles are supported; PGS/VobSub bitmap tracks are not.
+- DRM-protected media and damaged containers are not supported.
+- The application selects the first video track. Switching between multiple video tracks is not currently exposed in the interface.
 
-## Bezpečné ukončení
+## Safe shutdown
 
-Při zavření okna se nejprve zastaví časovač, dekódovací vlákno a oba zvukové streamy. Audio callbacky používají zamčené fronty a neprovádějí žádné operace v GUI vlákně.
+Closing the window stops the UI timer, decoding thread, and both audio streams in that order. Audio callbacks use locked queues and never perform GUI operations.

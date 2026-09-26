@@ -5,7 +5,7 @@ import time
 
 
 class PlaybackClock:
-    """Monotónní hlavní čas přehrávače, bezpečný mezi vlákny."""
+    """Thread-safe monotonic master playback clock."""
 
     def __init__(self) -> None:
         self._lock = threading.RLock()

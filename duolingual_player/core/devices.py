@@ -8,7 +8,7 @@ class AudioDeviceError(RuntimeError):
 
 
 def list_output_devices() -> list[DeviceInfo]:
-    """Vrátí aktivní výstupy; WASAPI řadí na Windows před ostatní host API."""
+    """Return active outputs, listing WASAPI before other host APIs on Windows."""
     try:
         import sounddevice as sd
 
@@ -20,14 +20,14 @@ def list_output_devices() -> list[DeviceInfo]:
                 continue
             host_index = int(raw.get("hostapi", -1))
             host_name = (
-                str(host_apis[host_index].get("name", "Neznámé API"))
+                str(host_apis[host_index].get("name", "Unknown API"))
                 if 0 <= host_index < len(host_apis)
-                else "Neznámé API"
+                else "Unknown API"
             )
             devices.append(
                 DeviceInfo(
                     index=index,
-                    name=str(raw.get("name", f"Zařízení {index}")),
+                    name=str(raw.get("name", f"Device {index}")),
                     host_api=host_name,
                     max_output_channels=channels,
                     default_sample_rate=max(8_000, int(raw.get("default_samplerate", 48_000))),
@@ -37,8 +37,8 @@ def list_output_devices() -> list[DeviceInfo]:
             devices,
             key=lambda item: ("wasapi" not in item.host_api.lower(), item.name.casefold(), item.index),
         )
-    except Exception as exc:  # PortAudio může selhat už při výčtu zařízení.
-        raise AudioDeviceError(f"Zvuková zařízení nelze načíst: {exc}") from exc
+    except Exception as exc:  # PortAudio may fail while enumerating devices.
+        raise AudioDeviceError(f"Audio devices could not be loaded: {exc}") from exc
 
 
 def find_device(devices: list[DeviceInfo], index: int | None) -> DeviceInfo | None:

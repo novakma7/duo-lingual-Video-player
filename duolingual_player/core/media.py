@@ -27,7 +27,7 @@ def probe_media(path: str | Path) -> MediaInfo:
         duration = float(container.duration or 0) / float(av.time_base)
         info = MediaInfo(path=source, duration=max(0.0, duration))
         for stream in container.streams:
-            codec = stream.codec_context.name or "neznámý"
+            codec = stream.codec_context.name or "unknown"
             language = _metadata_text(stream.metadata, "language", "und")
             title = _metadata_text(stream.metadata, "title")
             if stream.type == "video":
@@ -60,7 +60,7 @@ def probe_media(path: str | Path) -> MediaInfo:
 
 
 class DecodeWorker:
-    """Jediné demuxovací vlákno; každou vybranou audio stopu směruje do vlastní pipeline."""
+    """Single demux thread routing each selected audio track to its own pipeline."""
 
     def __init__(
         self,
@@ -162,7 +162,7 @@ class DecodeWorker:
                     self.on_eof()
         except Exception as exc:
             if not self._stop.is_set():
-                self.on_error(f"Chyba při dekódování média: {exc}")
+                self.on_error(f"Media decoding error: {exc}")
 
 
 _ASS_OVERRIDE = re.compile(r"\{[^}]*\}")

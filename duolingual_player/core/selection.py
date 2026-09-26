@@ -7,7 +7,7 @@ from .models import DeviceInfo, TrackInfo
 
 
 def choose_default_tracks(tracks: Sequence[TrackInfo]) -> tuple[Optional[int], Optional[int]]:
-    """Vybere dvě různé stopy, pokud existují; jinak dostupnou stopu pouze pro A."""
+    """Choose two distinct tracks, or the only available track for output A."""
     if not tracks:
         return None, None
     if len(tracks) == 1:
@@ -16,7 +16,7 @@ def choose_default_tracks(tracks: Sequence[TrackInfo]) -> tuple[Optional[int], O
 
 
 def choose_default_outputs(devices: Sequence[DeviceInfo]) -> tuple[Optional[int], Optional[int]]:
-    """Preferuje dvě různá výstupní zařízení."""
+    """Prefer two distinct output devices."""
     if not devices:
         return None, None
     first = devices[0].index
@@ -32,17 +32,17 @@ def validate_routes(
 ) -> list[str]:
     errors: list[str] = []
     if track_a is None or track_b is None:
-        errors.append("Vyberte zvukovou stopu pro výstup A i B.")
+        errors.append("Select an audio track for both output A and output B.")
     elif track_a == track_b:
-        errors.append("Pro dva jazyky zvolte dvě různé zvukové stopy.")
+        errors.append("Select two different audio tracks for two languages.")
     if device_a is None or device_b is None:
-        errors.append("Vyberte výstupní zařízení A i B.")
+        errors.append("Select an output device for both A and B.")
     elif device_a == device_b:
-        errors.append("Pro oddělený poslech zvolte dvě různá výstupní zařízení.")
+        errors.append("Select two different output devices for separate listening.")
     return errors
 
 
 def scheduled_audio_time(source_pts: float, offset_ms: int) -> float:
-    """Čas na hlavních hodinách, kdy má zaznít vzorek se zadaným PTS."""
+    """Master-clock time at which a sample with the given PTS should play."""
     return source_pts + offset_ms / 1000.0
 

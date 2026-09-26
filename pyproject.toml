@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "duolingual-player"
 version = "0.1.0"
-description = "Dvoujazyčný MKV přehrávač se dvěma nezávislými audio výstupy"
+description = "Dual-language MKV player with two independent audio outputs"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [

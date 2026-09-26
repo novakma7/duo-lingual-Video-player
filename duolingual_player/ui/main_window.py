@@ -41,11 +41,11 @@ def format_time(seconds: float) -> str:
 
 class AudioRouteBox(QGroupBox):
     def __init__(self, channel: str, parent=None) -> None:
-        super().__init__(f"Výstup {channel}", parent)
+        super().__init__(f"Output {channel}", parent)
         self.track = QComboBox()
-        self.track.setToolTip(f"Stopa pro výstup {channel}")
+        self.track.setToolTip(f"Audio track for output {channel}")
         self.device = QComboBox()
-        self.device.setToolTip(f"WASAPI / zvukové zařízení pro výstup {channel}")
+        self.device.setToolTip(f"WASAPI / audio device for output {channel}")
         self.volume = QSlider(Qt.Orientation.Horizontal)
         self.volume.setRange(0, 150)
         self.volume.setValue(100)
@@ -57,12 +57,12 @@ class AudioRouteBox(QGroupBox):
         self.offset.setRange(-5000, 5000)
         self.offset.setSingleStep(10)
         self.offset.setSuffix(" ms")
-        self.offset.setToolTip("Kladná hodnota zvuk zpozdí, záporná jej předsune.")
+        self.offset.setToolTip("A positive value delays audio; a negative value advances it.")
         layout = QFormLayout(self)
-        layout.addRow("Zvuková stopa:", self.track)
-        layout.addRow("Zařízení:", self.device)
-        layout.addRow("Hlasitost:", volume_row)
-        layout.addRow("Synchronizace:", self.offset)
+        layout.addRow("Audio track:", self.track)
+        layout.addRow("Device:", self.device)
+        layout.addRow("Volume:", volume_row)
+        layout.addRow("Sync offset:", self.offset)
 
 
 class MainWindow(QMainWindow):
@@ -84,13 +84,13 @@ class MainWindow(QMainWindow):
 
     def _build_ui(self) -> None:
         self.video = VideoWidget()
-        self.open_button = QPushButton("Otevřít MKV")
+        self.open_button = QPushButton("Open MKV")
         self.play_button = QToolButton()
         self.play_button.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay))
-        self.play_button.setToolTip("Přehrát / pauza (mezerník)")
+        self.play_button.setToolTip("Play / pause (Space)")
         self.stop_button = QToolButton()
         self.stop_button.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaStop))
-        self.stop_button.setToolTip("Zastavit")
+        self.stop_button.setToolTip("Stop")
         self.timeline = QSlider(Qt.Orientation.Horizontal)
         self.timeline.setRange(0, 0)
         self.time_label = QLabel("00:00 / 00:00")
@@ -115,29 +115,29 @@ class MainWindow(QMainWindow):
 
         self.route_a = AudioRouteBox("A")
         self.route_b = AudioRouteBox("B")
-        self.refresh_devices_button = QPushButton("Obnovit zvuková zařízení")
+        self.refresh_devices_button = QPushButton("Refresh audio devices")
         self.route_hint = QLabel(
-            "Pro oddělený poslech vyberte dvě různé jazykové stopy a dvě různá "
-            "výstupní zařízení. VoiceMeeter vstupy se zobrazí stejně jako ostatní výstupy."
+            "For separate listening, select two different language tracks and two different "
+            "output devices. VoiceMeeter inputs are listed like any other output."
         )
         self.route_hint.setWordWrap(True)
         self.route_hint.setObjectName("hint")
 
-        subtitle_box = QGroupBox("Titulky")
+        subtitle_box = QGroupBox("Subtitles")
         subtitle_layout = QVBoxLayout(subtitle_box)
         self.subtitle_combo = QComboBox()
-        self.subtitle_combo.addItem("Vypnuto", None)
-        self.external_subtitle_button = QPushButton("Načíst externí SRT…")
+        self.subtitle_combo.addItem("Off", None)
+        self.external_subtitle_button = QPushButton("Load external SRT…")
         subtitle_layout.addWidget(self.subtitle_combo)
         subtitle_layout.addWidget(self.external_subtitle_button)
 
-        diagnostics_box = QGroupBox("Diagnostika")
+        diagnostics_box = QGroupBox("Diagnostics")
         diagnostics_layout = QVBoxLayout(diagnostics_box)
         self.diagnostics = QPlainTextEdit()
         self.diagnostics.setReadOnly(True)
         self.diagnostics.setMaximumBlockCount(30)
         self.diagnostics.setMinimumHeight(190)
-        self.diagnostics.setPlainText("Čekám na otevření média…")
+        self.diagnostics.setPlainText("Waiting for a media file…")
         diagnostics_layout.addWidget(self.diagnostics)
 
         side_layout = QVBoxLayout()
@@ -162,29 +162,29 @@ class MainWindow(QMainWindow):
         self.splitter.setStretchFactor(0, 1)
         self.splitter.setStretchFactor(1, 0)
         self.setCentralWidget(self.splitter)
-        self.statusBar().showMessage("Připraveno – otevřete soubor MKV.")
+        self.statusBar().showMessage("Ready — open an MKV file.")
 
-        file_menu = self.menuBar().addMenu("Soubor")
-        open_action = QAction("Otevřít…", self)
+        file_menu = self.menuBar().addMenu("File")
+        open_action = QAction("Open…", self)
         open_action.setShortcut(QKeySequence.StandardKey.Open)
         open_action.triggered.connect(self.open_file)
         file_menu.addAction(open_action)
         file_menu.addSeparator()
-        quit_action = QAction("Ukončit", self)
+        quit_action = QAction("Exit", self)
         quit_action.setShortcut(QKeySequence.StandardKey.Quit)
         quit_action.triggered.connect(self.close)
         file_menu.addAction(quit_action)
-        view_menu = self.menuBar().addMenu("Zobrazení")
-        self.fullscreen_action = QAction("Celá obrazovka", self)
+        view_menu = self.menuBar().addMenu("View")
+        self.fullscreen_action = QAction("Fullscreen", self)
         self.fullscreen_action.setCheckable(True)
         self.fullscreen_action.setShortcut("F")
         self.fullscreen_action.triggered.connect(self.toggle_fullscreen)
         view_menu.addAction(self.fullscreen_action)
-        self.smoothing_action = QAction("Vyhlazení obrazu", self)
+        self.smoothing_action = QAction("Video smoothing", self)
         self.smoothing_action.setCheckable(True)
         self.smoothing_action.setChecked(True)
         self.smoothing_action.setToolTip(
-            "Jemnější interpolace při zvětšování videa; může mírně zvýšit zatížení GPU/CPU."
+            "Smoother interpolation when scaling video; may slightly increase GPU/CPU usage."
         )
         self.smoothing_action.toggled.connect(self._set_video_smoothing)
         view_menu.addAction(self.smoothing_action)
@@ -258,10 +258,10 @@ class MainWindow(QMainWindow):
 
     def open_file(self) -> None:
         path, _ = QFileDialog.getOpenFileName(
-            self, "Otevřít video", str(Path.home()), "Matroska video (*.mkv);;Všechna média (*.*)"
+            self, "Open video", str(Path.home()), "Matroska video (*.mkv);;All media (*.*)"
         )
         if path:
-            self.statusBar().showMessage(f"Načítám {Path(path).name}…")
+            self.statusBar().showMessage(f"Loading {Path(path).name}…")
             self.controller.open_media(path)
 
     def _media_loaded(self, info: MediaInfo) -> None:
@@ -269,11 +269,11 @@ class MainWindow(QMainWindow):
         try:
             for box in (self.route_a, self.route_b):
                 box.track.clear()
-                box.track.addItem("— nevybráno —", None)
+                box.track.addItem("— not selected —", None)
                 for track in info.audio_tracks:
                     box.track.addItem(track.label, track.index)
             self.subtitle_combo.clear()
-            self.subtitle_combo.addItem("Vypnuto", None)
+            self.subtitle_combo.addItem("Off", None)
             for track in info.subtitle_tracks:
                 self.subtitle_combo.addItem(track.label, track.index)
             self.timeline.setRange(0, max(0, int(info.duration * 1000)))
@@ -283,10 +283,10 @@ class MainWindow(QMainWindow):
             (self.controller.track_a, self.controller.track_b, self.controller.device_a, self.controller.device_b)
         )
         self.video.clear_frame()
-        self.video.set_message(f"{info.path.name}\n\nStiskněte mezerník nebo tlačítko Přehrát.")
+        self.video.set_message(f"{info.path.name}\n\nPress Space or click Play.")
         self.setWindowTitle(f"{info.path.name} – DuoLingual Player")
         self.statusBar().showMessage(
-            f"Načteno: {len(info.audio_tracks)} zvukových a {len(info.subtitle_tracks)} titulkových stop."
+            f"Loaded: {len(info.audio_tracks)} audio and {len(info.subtitle_tracks)} subtitle tracks."
         )
 
     def _devices_changed(self, devices: list) -> None:
@@ -294,7 +294,7 @@ class MainWindow(QMainWindow):
         try:
             for box in (self.route_a, self.route_b):
                 box.device.clear()
-                box.device.addItem("— nevybráno —", None)
+                box.device.addItem("— not selected —", None)
                 for device in devices:
                     box.device.addItem(device.label, device.index)
         finally:
@@ -302,7 +302,7 @@ class MainWindow(QMainWindow):
         self._sync_route_selections(
             (self.controller.track_a, self.controller.track_b, self.controller.device_a, self.controller.device_b)
         )
-        self.statusBar().showMessage(f"Nalezeno {len(devices)} výstupních zvukových zařízení.", 5000)
+        self.statusBar().showMessage(f"Found {len(devices)} audio output devices.", 5000)
 
     def _sync_route_selections(self, routes: tuple) -> None:
         self._updating = True
@@ -348,7 +348,7 @@ class MainWindow(QMainWindow):
             else QStyle.StandardPixmap.SP_MediaPlay
         )
         self.play_button.setIcon(self.style().standardIcon(icon))
-        self.statusBar().showMessage(f"Stav: {state.value}")
+        self.statusBar().showMessage(f"State: {state.value}")
 
     def _subtitle_selected(self) -> None:
         if self._updating:
@@ -363,13 +363,13 @@ class MainWindow(QMainWindow):
 
     def _load_external_subtitle(self) -> None:
         path, _ = QFileDialog.getOpenFileName(
-            self, "Načíst externí titulky", str(Path.home()), "SubRip titulky (*.srt)"
+            self, "Load external subtitles", str(Path.home()), "SubRip subtitles (*.srt)"
         )
         if path:
             self._external_subtitle_path = path
             self.controller.load_external_subtitle(path)
             self._updating = True
-            self.subtitle_combo.addItem(f"Externí: {Path(path).name}", "external")
+            self.subtitle_combo.addItem(f"External: {Path(path).name}", "external")
             self.subtitle_combo.setCurrentIndex(self.subtitle_combo.count() - 1)
             self._updating = False
 
@@ -379,12 +379,12 @@ class MainWindow(QMainWindow):
 
     def _toggle_mute(self) -> None:
         muted = self.controller.toggle_mute()
-        self.statusBar().showMessage("Zvuk ztlumen" if muted else "Zvuk obnoven", 3000)
+        self.statusBar().showMessage("Audio muted" if muted else "Audio restored", 3000)
 
     def _set_video_smoothing(self, enabled: bool) -> None:
         self.video.set_smoothing(enabled)
-        state = "zapnuto" if enabled else "vypnuto"
-        self.statusBar().showMessage(f"Vyhlazení obrazu: {state}", 3000)
+        state = "on" if enabled else "off"
+        self.statusBar().showMessage(f"Video smoothing: {state}", 3000)
 
     def toggle_fullscreen(self) -> None:
         if self._fullscreen:

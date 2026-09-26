@@ -12,7 +12,7 @@ def audio_track(index: int) -> TrackInfo:
 
 
 def device(index: int) -> DeviceInfo:
-    return DeviceInfo(index, f"Zařízení {index}", "Windows WASAPI", 2, 48_000)
+    return DeviceInfo(index, f"Device {index}", "Windows WASAPI", 2, 48_000)
 
 
 def test_default_tracks_are_distinct() -> None:
@@ -29,8 +29,8 @@ def test_default_outputs_are_distinct() -> None:
 def test_route_validation_reports_same_track_and_device() -> None:
     errors = validate_routes(1, 1, 7, 7)
     assert len(errors) == 2
-    assert "stopy" in errors[0]
-    assert "zařízení" in errors[1]
+    assert "tracks" in errors[0]
+    assert "devices" in errors[1]
 
 
 def test_sync_offset_is_converted_from_milliseconds() -> None:

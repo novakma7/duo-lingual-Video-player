@@ -1,2 +1,2 @@
-"""Přehrávací jádro nezávislé na uživatelském rozhraní."""
+"""Playback core independent of the user interface."""
 

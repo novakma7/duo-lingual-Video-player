@@ -23,7 +23,7 @@ class AudioChunk:
 
 
 class AudioPipeline:
-    """Nezávislá fronta, převzorkovač a PortAudio/WASAPI výstup."""
+    """Independent queue, resampler, and PortAudio/WASAPI output."""
 
     MAX_BUFFER_SECONDS = 4.0
 
@@ -60,12 +60,12 @@ class AudioPipeline:
                 format="fltp", layout="stereo", rate=self._sample_rate
             )
         except Exception as exc:
-            self._set_error(f"Nelze připravit převzorkování: {exc}")
+            self._set_error(f"Could not initialize audio resampling: {exc}")
             raise
 
     def start(self) -> None:
         if self.device is None:
-            raise RuntimeError(f"Pro výstup {self.name} není vybrané zařízení.")
+            raise RuntimeError(f"No device is selected for output {self.name}.")
         if self._stream is not None:
             return
         try:
@@ -86,8 +86,8 @@ class AudioPipeline:
         except Exception as exc:
             self._stream = None
             message = (
-                f"Výstup {self.name} nelze otevřít na zařízení „{self.device.name}“: {exc}. "
-                "Zařízení mohlo být odpojeno; vyberte je znovu nebo zvolte jiné."
+                f"Output {self.name} could not be opened on device '{self.device.name}': {exc}. "
+                "The device may have been disconnected; select it again or choose another device."
             )
             self._set_error(message)
             raise RuntimeError(message) from exc
@@ -129,12 +129,12 @@ class AudioPipeline:
                     self._queued_frames += len(samples)
                 running_pts += len(samples) / self._sample_rate
         except Exception as exc:
-            self._set_error(f"Chyba dekódování zvuku {self.name}: {exc}")
+            self._set_error(f"Audio decoding error on output {self.name}: {exc}")
 
     def _audio_callback(self, outdata, frames: int, _time_info, status) -> None:
         outdata.fill(0)
         if status:
-            self._set_error(f"Zvukový výstup {self.name} hlásí: {status}")
+            self._set_error(f"Audio output {self.name} reported: {status}")
         if self.paused or not self.clock.playing:
             return
         write_at = 0
@@ -173,8 +173,8 @@ class AudioPipeline:
     def _stream_finished(self) -> None:
         if self._stream is not None:
             self._set_error(
-                f"Zvukový výstup {self.name} se neočekávaně ukončil. "
-                "Zkontrolujte Bluetooth/WASAPI zařízení a vyberte výstup znovu."
+                f"Audio output {self.name} stopped unexpectedly. "
+                "Check the Bluetooth/WASAPI device and select the output again."
             )
 
     def _set_error(self, message: str) -> None:
@@ -192,6 +192,6 @@ class AudioPipeline:
         return AudioDiagnostics(
             pts=self._last_pts,
             buffered_seconds=self.buffered_seconds,
-            device_name=self.device.name if self.device else "nevybráno",
+            device_name=self.device.name if self.device else "not selected",
             error=self._error,
         )

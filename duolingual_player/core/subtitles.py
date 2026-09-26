@@ -17,7 +17,7 @@ _TIMECODE = re.compile(
 def _seconds(value: str) -> float:
     match = _TIMECODE.fullmatch(value.strip())
     if not match:
-        raise ValueError(f"Neplatný čas titulku: {value}")
+        raise ValueError(f"Invalid subtitle timestamp: {value}")
     parts = {key: int(number) for key, number in match.groupdict().items()}
     return parts["h"] * 3600 + parts["m"] * 60 + parts["s"] + parts["ms"] / 1000
 

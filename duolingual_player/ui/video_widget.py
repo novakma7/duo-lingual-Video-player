@@ -17,9 +17,9 @@ class VideoWidget(QWidget):
         self._subtitle = ""
         self._smoothing = True
         self._message = (
-            "Otevřete soubor MKV\n\n"
-            "Pro dva jazyky vyberte dvě odlišné zvukové stopy\n"
-            "a dva různé výstupy v panelu vpravo."
+            "Open an MKV file\n\n"
+            "For two languages, select two different audio tracks\n"
+            "and two different outputs in the panel on the right."
         )
 
     def set_frame(self, rgb: np.ndarray) -> None:
